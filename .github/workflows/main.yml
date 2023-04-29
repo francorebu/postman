@@ -1,4 +1,4 @@
-name: Hello World
+name: JobName
 
 on: [push]
 
@@ -7,8 +7,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Echo Hello World
+    - name: Hello World
       run: echo "Hello World"
       
-    - name: Echo Hello World
+    - name: Hola Mundo
       run: echo "Hola Mundo"
