@@ -1,0 +1,18 @@
+name: PostmanWithCron
+
+on:
+  schedule:
+    - cron: '*/1 * * * *'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: 14.x
+    - name: Install Newman
+      run: npm install -g newman
+    - name: Run  rest collection
+      run: newman run https://api.getpostman.com/collections/4534149-f6af0796-d59d-4f85-a6f1-27026b2a994b?apikey=PMAK-644dbff454eabf297b08826e-337aa8444bc7c633caab73c13249a4ca21 --environment https://api.getpostman.com/environments/4534149-4bf1f3a9-16be-48d6-add7-49bd024a45c0?apikey=PMAK-644dbff454eabf297b08826e-337aa8444bc7c633caab73c13249a4ca21
