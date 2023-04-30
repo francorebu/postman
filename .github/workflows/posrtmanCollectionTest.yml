@@ -1,0 +1,20 @@
+name: posrtmanCollectionTest
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+variables:
+  environment: https://www.postman.com/francoarebuffi/workspace/new-personal-workspace/environment/4534149-4bf1f3a9-16be-48d6-add7-49bd024a45c0
+  collection: https://elements.getpostman.com/redirect?entityId=4534149-f6af0796-d59d-4f85-a6f1-27026b2a994b&entityType=collection
+
+steps:
+  - name: Install Newman
+    run: npm install -g newman
+
+  - name: Run Postman Collection
+    env:
+      environment: ${{variables.environment}}
+    run: newman run ${{variables.collection}} -e ${{variables.environment}}
