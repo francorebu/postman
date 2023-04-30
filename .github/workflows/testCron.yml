@@ -1,0 +1,16 @@
+name: testCron
+
+on:
+  schedule:
+    - cron: '*/1 * * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: test1
+      run: echo "Hello World"
+      
+    - name: test2
+      run: echo "Hola Mundo"
