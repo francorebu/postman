@@ -1,0 +1,17 @@
+name: PostmanTest
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: 14.x
+    - name: Install Newman
+      run: npm install -g newman
+    - name: Echo Hello World
+      run: newman run 4534149-f6af0796-d59d-4f85-a6f1-27026b2a994b -e 4534149-4bf1f3a9-16be-48d6-add7-49bd024a45c0
