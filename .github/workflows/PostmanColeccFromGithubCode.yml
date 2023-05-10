@@ -1,0 +1,18 @@
+name: PostmanColeccFromGithubCode
+
+on:
+  schedule:
+    - cron: '0 9 * * *'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: 14.x
+    - name: Install Newman
+      run: npm install -g newman
+    - name: Run  rest collection
+      run: newman run collections/RestCollection.postman_collection.json --environment environments/testing.postman_environment.json
