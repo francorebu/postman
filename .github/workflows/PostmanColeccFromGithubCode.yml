@@ -23,4 +23,4 @@ jobs:
     - uses: actions/checkout@v2
     
     - name: Run  rest collection
-      run: newman run /collections/RestCollection.postman_collection.json --environment /environments/testing.postman_environment.json
+      run: newman run collections/RestCollection.postman_collection.json --environment environments/testing.postman_environment.json
