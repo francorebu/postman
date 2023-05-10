@@ -18,4 +18,4 @@ jobs:
     - name: Install Newman
       run: npm install -g newman
     - name: Run  rest collection
-      run: newman run postman/collections/RestCollection.postman_collection.json --environment postman/environments/testing.postman_environment.json
+      run: newman run /collections/RestCollection.postman_collection.json --environment /postman/environments/testing.postman_environment.json
