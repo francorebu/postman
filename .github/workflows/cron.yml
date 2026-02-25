@@ -22,4 +22,4 @@ jobs:
       run: npm install -g newman
 
     - name: Run rest collection
-      run: newman run collections/samplecollection.json
+      run: newman run collections/RestCollection.postman_collection.json
