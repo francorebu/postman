@@ -1,4 +1,4 @@
-name: PostmanWithCron
+name: PostmanWithCronAllure
 
 on:
   schedule:
