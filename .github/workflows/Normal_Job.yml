@@ -1,4 +1,4 @@
-name: PostmanWithCron
+name: Normal_Job
 
 on:
   schedule:
