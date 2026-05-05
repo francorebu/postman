@@ -1,0 +1,3 @@
+"Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
+"passed","Tue May 05 21:41:33 UTC 2026","Tue May 05 21:41:33 UTC 2026","123","SampleCollection","","","","","updateUser","Generated from cURL: curl -X PUT 'https://reqres.in/api/users/2' -H 'x-api-key: reqres_390a72285773426ab93310ff2bbe9c70' -H 'Content-Type: application/json' -d '{""name"": ""morpheus"", ""job"": ""zion resident""}'"
+"passed","Tue May 05 21:41:33 UTC 2026","Tue May 05 21:41:33 UTC 2026","296","SampleCollection","","","","","GetSingleUser",""
