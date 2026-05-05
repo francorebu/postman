@@ -62,9 +62,13 @@ jobs:
           mkdir -p allure-report/history
           cp -r allure-results/history/. allure-report/history/ || true
 
-      # 🔥 Publica en GitHub Pages
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
+     # 🔥 Subir artifact para Pages
+      - name: Upload artifact for GitHub Pages
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./allure-report
+          path: ./allure-report
+      
+      # 🔥 Deploy real a GitHub Pages
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
