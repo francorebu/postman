@@ -1,4 +1,4 @@
-name: withTrendAndPagess
+name: withTrendAndPages
 
 on:
   schedule:
@@ -33,42 +33,74 @@ jobs:
           sudo mv allure-2.29.0 /opt/allure
           sudo ln -s /opt/allure/bin/allure /usr/local/bin/allure
 
+      # 🔥 Recupera history anterior desde gh-pages
+      - name: Restore Allure history
+        if: always()
+        run: |
+          git fetch origin gh-pages || true
+
+          mkdir -p allure-results/history
+
+          if git show-ref --verify --quiet refs/remotes/origin/gh-pages; then
+            git checkout origin/gh-pages -- history || true
+
+            if [ -d history ]; then
+              cp -r history/* allure-results/history/
+            fi
+          fi
+
       - name: Run Postman Collection
         run: |
           newman run collections/RestCollection.postman_collection.json \
           -r allure \
           --reporter-allure-export ./allure-results
 
-      # 🔥 Recupera history (para trend)
-      - name: Restore Allure history
-        if: always()
-        run: |
-          if git ls-remote --exit-code origin gh-pages > /dev/null 2>&1; then
-            git fetch origin gh-pages
-            mkdir -p allure-results/history
-            git checkout origin/gh-pages -- history/ 2>/dev/null && \
-            cp -r history/. allure-results/history/ || echo "No history yet"
-          else
-            echo "First run - no gh-pages branch yet"
-          fi
-
       - name: Generate Allure Report
         run: |
           allure generate ./allure-results --clean -o ./allure-report
 
-      # 🔥 Guarda history para el próximo run
-      - name: Save history
+      # 🔥 Guarda el nuevo history para próximas corridas
+      - name: Prepare history folder
         run: |
-          mkdir -p allure-report/history
-          cp -r allure-results/history/. allure-report/history/ || true
+          mkdir -p history
+          cp -r allure-report/history/* history/
 
-     # 🔥 Subir artifact para Pages
+      # 🔥 Commit history en gh-pages
+      - name: Commit history
+        run: |
+          git config --global user.name github-actions
+          git config --global user.email github-actions@github.com
+
+          git fetch origin gh-pages || true
+
+          if git show-ref --verify --quiet refs/remotes/origin/gh-pages; then
+            git checkout gh-pages || git checkout -b gh-pages origin/gh-pages
+          else
+            git checkout --orphan gh-pages
+          fi
+
+          cp -r history ./history-temp || true
+
+          git rm -rf . || true
+
+          cp -r history-temp history || true
+
+          rm -rf history-temp
+
+          git add history
+          git commit -m "Update Allure history" || echo "No changes to commit"
+
+          git push origin gh-pages
+
+          git checkout -
+
+      # 🔥 Upload artifact para Pages
       - name: Upload artifact for GitHub Pages
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./allure-report
-      
-      # 🔥 Deploy real a GitHub Pages
+
+      # 🔥 Deploy GitHub Pages
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
