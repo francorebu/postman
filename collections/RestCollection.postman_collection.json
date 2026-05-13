@@ -12,7 +12,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://reqres.in/api/userss/2",
+					"raw": "https://reqres.in/apii/users/2",
 					"protocol": "https",
 					"host": [
 						"reqres",
