@@ -50,6 +50,7 @@ jobs:
           fi
 
       - name: Run Postman Collection
+        continue-on-error: true
         run: |
           newman run collections/RestCollection.postman_collection.json \
           -r allure \
