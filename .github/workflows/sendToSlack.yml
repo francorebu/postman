@@ -37,17 +37,17 @@ jobs:
       - name: Send Slack notification
         if: always()
         run: |
-          PASSED=$((TOTAL-FAILED))
-
+          PASSED_ASSERTIONS=$((ASSERTIONS-FAILED_ASSERTIONS))
+      
+          if [ "${{ job.status }}" = "success" ]; then
+            STATUS_ICON="✅"
+          else
+            STATUS_ICON="❌"
+          fi
+      
+          RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+      
           curl -X POST \
             -H 'Content-type: application/json' \
             --data "{
-              \"text\":\"Postman Results
-
-              Total Assertions: $TOTAL
-              Passed: $PASSED
-              Failed: $FAILED
-
-              Status: ${{ job.status }}\"
-            }" \
-            ${{ secrets.SLACK_WEBHOOK_URL }}
+              \"text\":\"${STATUS_ICON} *Postman Collection Results*
