@@ -52,26 +52,27 @@ jobs:
 
           RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-          cat > payload.json << EOF
-          {
-            "text": "${STATUS_ICON} Postman Collection Results
+          MESSAGE=$(cat <<EOF
+          ${STATUS_ICON} *Postman Collection Results*
 
-          📦 Repository: ${{ github.repository }}
-          🌿 Branch: ${{ github.ref_name }}
+          📦 *Repository:* ${{ github.repository }}
+          🌿 *Branch:* ${{ github.ref_name }}
 
-          📨 Requests Executed: ${REQUESTS}
-          ⚠️ Failed Requests: ${FAILED_REQUESTS}
+          📨 *Requests Executed:* ${REQUESTS}
+          ⚠️ *Failed Requests:* ${FAILED_REQUESTS}
 
-          🧪 Assertions: ${ASSERTIONS}
-          ✅ Passed Assertions: ${PASSED_ASSERTIONS}
-          ❌ Failed Assertions: ${FAILED_ASSERTIONS}
+          🧪 *Assertions:* ${ASSERTIONS}
+          ✅ *Passed Assertions:* ${PASSED_ASSERTIONS}
+          ❌ *Failed Assertions:* ${FAILED_ASSERTIONS}
 
-          🚦 Status: ${{ job.status }}
+          🚦 *Status:* ${{ job.status }}
 
-          🔗 GitHub Run:
-          ${RUN_URL}"
-          }
+          🔗 *GitHub Run:*
+          ${RUN_URL}
           EOF
+          )
+
+          jq -n --arg text "$MESSAGE" '{text: $text}' > payload.json
 
           curl -X POST \
             -H "Content-type: application/json" \
