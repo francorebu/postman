@@ -1,0 +1,33 @@
+name: sendToSlack
+
+on:
+  workflow_dispatch
+
+jobs:
+  run-postman:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Newman
+        run: npm install -g newman
+
+      - name: Run Postman collection
+        run: |
+          newman run collections/RestCollection.postman_collection.json \
+          --reporters cli
+
+      - name: Send Slack notification
+        if: always()
+        run: |
+          curl -X POST \
+          -H 'Content-type: application/json' \
+          --data '{"text":"Hola desde GitHub Actions"}' \
+          ${{ secrets.SLACK_WEBHOOK_URL }}
