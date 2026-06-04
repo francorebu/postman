@@ -25,29 +25,55 @@ jobs:
         continue-on-error: true
         run: |
           newman run collections/RestCollection.postman_collection.json \
-          --reporters cli,json \
-          --reporter-json-export results.json
+            --reporters cli,json \
+            --reporter-json-export results.json
 
       - name: Extract Newman results
         if: always()
         run: |
-          echo "TOTAL=$(jq '.run.stats.assertions.total' results.json)" >> $GITHUB_ENV
-          echo "FAILED=$(jq '.run.stats.assertions.failed' results.json)" >> $GITHUB_ENV
+          echo "REQUESTS=$(jq '.run.stats.requests.total' results.json)" >> $GITHUB_ENV
+          echo "FAILED_REQUESTS=$(jq '.run.stats.requests.failed' results.json)" >> $GITHUB_ENV
+
+          echo "ASSERTIONS=$(jq '.run.stats.assertions.total' results.json)" >> $GITHUB_ENV
+          echo "FAILED_ASSERTIONS=$(jq '.run.stats.assertions.failed' results.json)" >> $GITHUB_ENV
 
       - name: Send Slack notification
         if: always()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          PASSED_ASSERTIONS=$((ASSERTIONS-FAILED_ASSERTIONS))
-      
+          PASSED_ASSERTIONS=$((ASSERTIONS - FAILED_ASSERTIONS))
+
           if [ "${{ job.status }}" = "success" ]; then
             STATUS_ICON="✅"
           else
             STATUS_ICON="❌"
           fi
-      
+
           RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-      
+
+          cat > payload.json << EOF
+          {
+            "text": "${STATUS_ICON} Postman Collection Results
+
+          📦 Repository: ${{ github.repository }}
+          🌿 Branch: ${{ github.ref_name }}
+
+          📨 Requests Executed: ${REQUESTS}
+          ⚠️ Failed Requests: ${FAILED_REQUESTS}
+
+          🧪 Assertions: ${ASSERTIONS}
+          ✅ Passed Assertions: ${PASSED_ASSERTIONS}
+          ❌ Failed Assertions: ${FAILED_ASSERTIONS}
+
+          🚦 Status: ${{ job.status }}
+
+          🔗 GitHub Run:
+          ${RUN_URL}"
+          }
+          EOF
+
           curl -X POST \
-            -H 'Content-type: application/json' \
-            --data "{
-              \"text\":\"${STATUS_ICON} *Postman Collection Results*
+            -H "Content-type: application/json" \
+            --data @payload.json \
+            "$SLACK_WEBHOOK_URL"
