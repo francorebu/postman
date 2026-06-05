@@ -33,7 +33,6 @@ jobs:
         run: |
           echo "REQUESTS=$(jq '.run.stats.requests.total' results.json)" >> $GITHUB_ENV
           echo "FAILED_REQUESTS=$(jq '.run.stats.requests.failed' results.json)" >> $GITHUB_ENV
-
           echo "ASSERTIONS=$(jq '.run.stats.assertions.total' results.json)" >> $GITHUB_ENV
           echo "FAILED_ASSERTIONS=$(jq '.run.stats.assertions.failed' results.json)" >> $GITHUB_ENV
 
@@ -44,30 +43,31 @@ jobs:
         run: |
           PASSED_ASSERTIONS=$((ASSERTIONS - FAILED_ASSERTIONS))
 
+          if [ "$FAILED_REQUESTS" -gt 0 ] || [ "$FAILED_ASSERTIONS" -gt 0 ]; then
+            STATUS="🔴"
+            RESULT="FAILED"
+          else
+            STATUS="🟢"
+            RESULT="PASSED"
+          fi
+
           RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
           MESSAGE=$(cat <<EOF
-          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-          
-          🧪 *API Tests*
-          
-          📨 *Requests Executed:* ${REQUESTS}
-          ⚠️ *Failed Requests:* ${FAILED_REQUESTS}
-          
-          🧪 *Assertions:* ${ASSERTIONS}
-          ✅ *Passed Assertions:* ${PASSED_ASSERTIONS}
-          ❌ *Failed Assertions:* ${FAILED_ASSERTIONS}
-          
-          🔗 *GitHub Run:*
+          ${STATUS} *API Tests ${RESULT}*
+
+          📨 Requests: ${REQUESTS}
+          ✅ Assertions Passed: ${PASSED_ASSERTIONS}
+          ❌ Assertions Failed: ${FAILED_ASSERTIONS}
+
+          🔗 View Run
           ${RUN_URL}
-          
-          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
           EOF
           )
-          
-                    jq -n --arg text "$MESSAGE" '{text: $text}' > payload.json
-          
-                    curl -X POST \
-                      -H "Content-type: application/json" \
-                      --data @payload.json \
-                      "$SLACK_WEBHOOK_URL"
+
+          jq -n --arg text "$MESSAGE" '{text: $text}' > payload.json
+
+          curl -X POST \
+            -H "Content-type: application/json" \
+            --data @payload.json \
+            "$SLACK_WEBHOOK_URL"
