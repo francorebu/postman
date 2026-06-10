@@ -24,9 +24,15 @@ jobs:
       - name: Run Postman collection
         continue-on-error: true
         run: |
+          START_TIME=$(date +%s)
+
           newman run collections/RestCollection.postman_collection.json \
             --reporters cli,json \
             --reporter-json-export results.json
+
+          END_TIME=$(date +%s)
+
+          echo "DURATION=$((END_TIME - START_TIME))" >> $GITHUB_ENV
 
       - name: Extract Newman results
         if: always()
@@ -53,17 +59,7 @@ jobs:
 
           RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-          MESSAGE=$(cat <<EOF
-          ${STATUS} *API Tests ${RESULT}*
-
-          📨 Requests: ${REQUESTS}
-          ✅ Assertions Passed: ${PASSED_ASSERTIONS}
-          ❌ Assertions Failed: ${FAILED_ASSERTIONS}
-
-          🔗 View Run
-          ${RUN_URL}
-          EOF
-          )
+          MESSAGE="${STATUS} API Tests ${RESULT} | 📨 ${REQUESTS} Requests | ✅ ${PASSED_ASSERTIONS} Passed | ❌ ${FAILED_ASSERTIONS} Failed | ⏱️ ${DURATION}s | 🔗 ${RUN_URL}"
 
           jq -n --arg text "$MESSAGE" '{text: $text}' > payload.json
 
