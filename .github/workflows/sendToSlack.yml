@@ -38,7 +38,7 @@ jobs:
           echo "FAILED_ASSERTIONS=$(jq '.run.stats.assertions.failed' results.json)" >> $GITHUB_ENV
 
           DURATION_MS=$(jq '.run.timings.completed - .run.timings.started' results.json)
-          echo "DURATION=$((DURATION_MS / 1000))" >> $GITHUB_ENV
+          echo "DURATION_MS=$DURATION_MS" >> $GITHUB_ENV
 
       - name: Send Slack Notification
         if: always()
@@ -56,10 +56,16 @@ jobs:
             RESULT="PASSED"
           fi
 
+          if [ "$DURATION_MS" -lt 1000 ]; then
+            DURATION_DISPLAY="${DURATION_MS}ms"
+          else
+            DURATION_DISPLAY="$((DURATION_MS / 1000))s"
+          fi
+
           RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           RUN_LINK="<${RUN_URL}|View Run>"
 
-          MESSAGE="${STATUS} API Tests ${RESULT} | 📨 ${REQUESTS} Requests | ✅ ${PASSED_REQUESTS} Req Passed | 🚨 ${FAILED_REQUESTS} Req Failed | ✅ ${PASSED_ASSERTIONS} Assert Passed | ❌ ${FAILED_ASSERTIONS} Assert Failed | ⏱️ ${DURATION}s | 🔗 ${RUN_LINK}"
+          MESSAGE="${STATUS} API Tests ${RESULT} | 📨 ${REQUESTS} Requests | ✅ ${PASSED_REQUESTS} Req Passed | 🚨 ${FAILED_REQUESTS} Req Failed | ✅ ${PASSED_ASSERTIONS} Assert Passed | ❌ ${FAILED_ASSERTIONS} Assert Failed | ⏱️ ${DURATION_DISPLAY} | 🔗 ${RUN_LINK}"
 
           jq -n \
             --arg text "$MESSAGE" \
