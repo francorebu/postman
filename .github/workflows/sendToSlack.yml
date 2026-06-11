@@ -24,15 +24,9 @@ jobs:
       - name: Run Postman Collection
         continue-on-error: true
         run: |
-          START_TIME=$(date +%s)
-
           newman run collections/RestCollection.postman_collection.json \
             --reporters cli,json \
             --reporter-json-export results.json
-
-          END_TIME=$(date +%s)
-
-          echo "DURATION=$((END_TIME - START_TIME))" >> $GITHUB_ENV
 
       - name: Extract Newman Results
         if: always()
@@ -42,6 +36,9 @@ jobs:
 
           echo "ASSERTIONS=$(jq '.run.stats.assertions.total' results.json)" >> $GITHUB_ENV
           echo "FAILED_ASSERTIONS=$(jq '.run.stats.assertions.failed' results.json)" >> $GITHUB_ENV
+
+          DURATION_MS=$(jq '.run.timings.completed - .run.timings.started' results.json)
+          echo "DURATION=$((DURATION_MS / 1000))" >> $GITHUB_ENV
 
       - name: Send Slack Notification
         if: always()
