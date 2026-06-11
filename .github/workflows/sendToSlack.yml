@@ -21,7 +21,7 @@ jobs:
       - name: Install Newman
         run: npm install -g newman
 
-      - name: Run Postman collection
+      - name: Run Postman Collection
         continue-on-error: true
         run: |
           START_TIME=$(date +%s)
@@ -34,19 +34,21 @@ jobs:
 
           echo "DURATION=$((END_TIME - START_TIME))" >> $GITHUB_ENV
 
-      - name: Extract Newman results
+      - name: Extract Newman Results
         if: always()
         run: |
           echo "REQUESTS=$(jq '.run.stats.requests.total' results.json)" >> $GITHUB_ENV
           echo "FAILED_REQUESTS=$(jq '.run.stats.requests.failed' results.json)" >> $GITHUB_ENV
+
           echo "ASSERTIONS=$(jq '.run.stats.assertions.total' results.json)" >> $GITHUB_ENV
           echo "FAILED_ASSERTIONS=$(jq '.run.stats.assertions.failed' results.json)" >> $GITHUB_ENV
 
-      - name: Send Slack notification
+      - name: Send Slack Notification
         if: always()
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
+          PASSED_REQUESTS=$((REQUESTS - FAILED_REQUESTS))
           PASSED_ASSERTIONS=$((ASSERTIONS - FAILED_ASSERTIONS))
 
           if [ "$FAILED_REQUESTS" -gt 0 ] || [ "$FAILED_ASSERTIONS" -gt 0 ]; then
@@ -58,10 +60,13 @@ jobs:
           fi
 
           RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          RUN_LINK="<${RUN_URL}|View Run>"
 
-          MESSAGE="${STATUS} API Tests ${RESULT} | 📨 ${REQUESTS} Requests | ✅ ${PASSED_ASSERTIONS} Passed | ❌ ${FAILED_ASSERTIONS} Failed | ⏱️ ${DURATION}s | 🔗 ${RUN_URL}"
+          MESSAGE="${STATUS} API Tests ${RESULT} | 📨 ${REQUESTS} Requests | ✅ ${PASSED_REQUESTS} Req Passed | 🚨 ${FAILED_REQUESTS} Req Failed | ✅ ${PASSED_ASSERTIONS} Assert Passed | ❌ ${FAILED_ASSERTIONS} Assert Failed | ⏱️ ${DURATION}s | 🔗 ${RUN_LINK}"
 
-          jq -n --arg text "$MESSAGE" '{text: $text}' > payload.json
+          jq -n \
+            --arg text "$MESSAGE" \
+            '{text: $text}' > payload.json
 
           curl -X POST \
             -H "Content-type: application/json" \
